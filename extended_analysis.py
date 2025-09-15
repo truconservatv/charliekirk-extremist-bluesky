@@ -1,115 +1,91 @@
-#!/usr/bin/env python3
+"""
+extended_analysis.py
+--------------------
+Analyzes Bluesky posts collected via bsky_charliekirk.py.
+- Flags extremist rhetoric using keywords
+- Applies severity scoring (1-5)
+- Summarizes top authors, word frequencies, and language breakdown
+- Saves charts for timeline and severity distribution
+
+Usage:
+    python extended_analysis.py
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
-from collections import Counter
-from langdetect import detect, DetectorFactory, LangDetectException
+from langdetect import detect
 
-DetectorFactory.seed = 0  # stable language detection
+INPUT_FILE = "charliekirk_deserved_posts.csv"
 
-INPUT = "charliekirk_posts.csv"
-OUTPUT = "charliekirk_flagged.csv"
-
-# Extended keyword & emoji patterns
-KEYWORDS = {
-    "kill": 3,
-    "death": 3,
-    "murder": 3,
-    "hang": 4,
-    "execute": 4,
-    "terrorist": 2,
-    "traitor": 2,
-    "fuck charlie kirk": 3,
-    "he deserved": 2,
-    "far-right": 1,
-    "far-right extremists": 2,
+# Keywords and severity scoring
+FLAG_TERMS = {
+    "deserved": 2,
+    "kill": 4,
+    "dead": 3,
+    "celebrate": 3,
+    "nazi": 4,
+    "hitler": 4,
+    "white supremacist": 4,
+    "far-right": 3,
+    "extremist": 3,
+    "trans": 2,
 }
 
-EMOJIS = {
-    "💀": 2,
-    "🔫": 3,
-    "🔪": 3,
-    "🔥": 2,
-    "☠️": 3,
-}
-
-def score_text(text: str) -> int:
+def score_post(text: str) -> int:
+    """Assign a severity score to a post based on keyword matches."""
     score = 0
-    lower = str(text).lower()
-    for kw, val in KEYWORDS.items():
-        if kw in lower:
-            score += val
-    for emoji, val in EMOJIS.items():
-        if emoji in str(text):
-            score += val
+    if not isinstance(text, str):
+        return score
+    for term, value in FLAG_TERMS.items():
+        if term.lower() in text.lower():
+            score = max(score, value)
     return score
 
-def safe_detect(text: str) -> str:
-    try:
-        if not isinstance(text, str) or len(text.strip()) < 20:
-            return "unknown"
-        return detect(text)
-    except LangDetectException:
-        return "unknown"
-
 def main():
-    df = pd.read_csv(INPUT)
-    df["score"] = df["text"].astype(str).apply(score_text)
+    print(f"Loading {INPUT_FILE}...")
+    df = pd.read_csv(INPUT_FILE)
 
-    # save updated flagged file
-    df.to_csv(OUTPUT, index=False)
+    # Apply scoring
+    df["score"] = df["text"].apply(score_post)
 
-    # --- Summary ---
-    total = len(df)
-    flagged = (df["score"] > 0).sum()
-    high = (df["score"] >= 4).sum()
-    print(f"Total posts: {total}")
-    print(f"Flagged: {flagged}")
-    print(f"High severity: {high}\n")
+    # Flagged subset
+    flagged = df[df["score"] > 0]
+    high_severity = flagged[flagged["score"] >= 4]
 
-    # --- Top repeat offenders ---
-    offenders = df[df["score"] > 0]["author"].value_counts().head(20)
+    print(f"Total posts: {len(df)}")
+    print(f"Flagged: {len(flagged)}")
+    print(f"High severity: {len(high_severity)}\n")
+
+    # Top repeat offenders
     print("Top repeat offenders:")
-    print(offenders)
+    print(flagged["author"].value_counts().head(20))
 
-    # --- Common violent/framing words ---
-    words = []
-    for t in df[df["score"] > 0]["text"].dropna():
-        words.extend(t.lower().split())
-    counter = Counter(words)
+    # Word counts
+    words = " ".join(flagged["text"].dropna().astype(str)).lower().split()
+    word_freq = pd.Series(words).value_counts().head(20)
     print("\nMost common words in flagged posts:")
-    for w, c in counter.most_common(20):
-        print(f"{w}: {c}")
+    print(word_freq)
 
-    # --- Language detection (sample 500) ---
-    sample = df.sample(min(500, len(df)), random_state=42)
-    langs = sample["text"].dropna().apply(safe_detect)
+    # Language detection (sample)
+    sample = flagged.sample(min(500, len(flagged)), random_state=42)
+    langs = sample["text"].dropna().apply(
+        lambda t: detect(t) if isinstance(t, str) and len(t) > 20 else "unknown"
+    )
     print("\nLanguage breakdown (sampled):")
     print(langs.value_counts())
 
-    # --- Timeline ---
+    # Timeline severity
     df["createdAt"] = pd.to_datetime(df["createdAt"], errors="coerce", utc=True)
-    df = df.dropna(subset=["createdAt"])
-    timeline = df.groupby(df["createdAt"].dt.date)["score"].agg(
-        total="count",
-        flagged=lambda x: (x > 0).sum(),
-        high=lambda x: (x >= 4).sum()
-    )
+    timeline = df.groupby(df["createdAt"].dt.date)["score"].agg(["count", "mean"])
 
-    timeline.plot(y=["total", "flagged", "high"], figsize=(10,6))
-    plt.title("Posts over time")
-    plt.ylabel("Count")
-    plt.xlabel("Date")
-    plt.legend(["Total", "Flagged", "High severity"])
-    plt.tight_layout()
+    # Charts
+    plt.figure(figsize=(10, 5))
+    timeline["count"].plot(title="Post Volume Over Time")
     plt.savefig("timeline.png")
-    print("\nSaved chart: timeline.png")
+    print("Saved chart: timeline.png")
 
-    # --- Severity histogram ---
-    df["score"].plot.hist(bins=20, figsize=(8,6))
-    plt.title("Distribution of severity scores")
-    plt.xlabel("Score")
-    plt.ylabel("Post count")
-    plt.tight_layout()
+    plt.figure(figsize=(8, 5))
+    flagged["score"].plot.hist(bins=5, title="Severity Score Distribution")
     plt.savefig("severity_hist.png")
     print("Saved chart: severity_hist.png")
 
