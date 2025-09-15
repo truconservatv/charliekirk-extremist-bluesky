@@ -21,53 +21,41 @@ task_ids:
 ---
 # Charlie Kirk Extremist Bluesky Dataset
 
-**Maintainer:** [@campbellmsean](https://huggingface.co/campbellmsean)  
-**Created:** September 2025  
+# Charlie Kirk Extremist Dataset (Bluesky)
+
+**Maintainer:** [@truconservatv](https://github.com/truconservatv)  
+
+This repository contains public posts scraped from Bluesky using its public API, focusing on extremist discourse surrounding Charlie Kirk — including posts celebrating his reported death and material from accounts linked to far-right and far-left extremist narratives.  
 
 ---
 
 ## Disclaimer
 
-This dataset contains **public posts** collected from the social media platform Bluesky using the **official public API**.  
+This dataset is provided **for journalistic and research purposes only**.  
+It contains **publicly available information** gathered from a public-facing API.  
 
-⚠️ **Important Notes**:
-- Posts were made publicly and voluntarily by their authors.  
-- This dataset is provided **solely for research, academic, and journalistic purposes**.  
-- It contains **harmful, offensive, extremist, and violent language**. The presence of this content does not imply endorsement.  
-- No private messages, emails, phone numbers, or non-public data are included.  
+- No private information was collected.  
+- No accounts were accessed without authorization.  
+- The purpose of this dataset is to allow **researchers, journalists, and watchdogs** to study extremist narratives, coordinated disinformation, and online radicalization patterns.  
 
----
-
-## Purpose
-
-The dataset was created to **document extremist rhetoric** and **celebratory reactions to political violence** so that journalists and researchers can study them responsibly.  
-
-This work aligns with Hugging Face’s Content Policy, which explicitly states that *“context matters—discussing extremist content academically or neutrally is allowed.”*
+The maintainer **does not endorse or promote any of the content** contained herein.
 
 ---
 
-## Methodology
+## Files
 
-- Data collected using the **atproto/Bluesky API** via Python.  
-- Queries targeted terms such as:  
-  - `"deserved it"`, `"far-right"`, `"far-right extremist"`, `"celebrate"`  
-  - Expanded to `"Nazi"`, `"Hitler"`, `"white supremacist"`, `"trans"`  
-- Posts were saved as `.csv` tables and later filtered/flagged for severity (celebration, threat, ideological reference).  
-- Handles are preserved only to document public posting; they should not be used for harassment.  
+- `charliekirk_deserved_posts.csv` — raw posts including the search terms.  
+- `charliekirk_celebration_broad.csv` — broader subset including “deserved it” and related terms.  
+- `charliekirk_celebration.csv` — filtered extremist celebration subset.  
 
 ---
 
-## License
+## Usage
 
-Licensed under **CC BY-NC-SA 4.0**.  
-- **Non-commercial use only.**  
-- **Attribution required.**  
-- **Share alike.**  
+Clone this repo:
 
----
+```bash
+git clone https://github.com/truconservatv/charliekirk-extremist-bluesky.git
+cd charliekirk-extremist-bluesky
 
-## Citation
 
-If you use this dataset, please cite:  
-
-> Campbell, S. (2025). Charlie Kirk Extremist Bluesky Dataset. Hugging Face. https://huggingface.co/datasets/campbellmsean/charliekirk-extremist-bluesky
