@@ -1,73 +1,69 @@
+"""
+bsky_charliekirk.py
+-------------------
+Collects Bluesky posts mentioning Charlie Kirk or related extremist terms
+using the official atproto client. Saves results to CSV.
+
+Usage:
+    python bsky_charliekirk.py
+"""
+
 import csv
-import time
 from atproto import Client
 
-# === CREDENTIALS ===
+# ---------------------------
+# CONFIGURATION
+# ---------------------------
 USERNAME = "seancreports.bsky.social"
-PASSWORD = "ftrg-agbi-jtbl-jtoi"   # app password
-
-# === SEARCH QUERIES ===
-QUERIES = [
-    "Charlie Kirk",
-    "he deserved",
-    "deserved it",
-    "far-right",
-]
-
-# === OUTPUT FILE ===
+PASSWORD = "your-app-password-here"  # Replace with your Bluesky app password
 OUTPUT_FILE = "charliekirk_deserved_posts.csv"
 
+# Search terms (transparent and replicable)
+SEARCH_TERMS = [
+    "Charlie Kirk",
+    "deserved it",
+    "he deserved it",
+    "she deserved it",
+    "they deserved it",
+    "far-right",
+    "right-wing",
+    "right-wing extremist",
+    "Nazi",
+    "Hitler",
+    "white supremacist",
+    "trans",
+]
 
-def save_to_csv(posts, filename):
-    """Save list of post dicts to CSV"""
-    keys = posts[0].keys() if posts else []
-    with open(filename, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=keys)
-        writer.writeheader()
-        writer.writerows(posts)
-
-
+# ---------------------------
+# MAIN SCRIPT
+# ---------------------------
 def main():
     client = Client()
     client.login(USERNAME, PASSWORD)
 
     all_posts = []
-    seen_uris = set()  # avoid duplicates
 
-    for query in QUERIES:
-        cursor = None
-        batch_size = 100
-
-        print(f"Searching for: {query}")
-        while True:
-            results = client.app.bsky.feed.search_posts(
-                {"q": query, "limit": batch_size, "cursor": cursor}
-            )
-            if not results.posts:
-                break
-
+    for term in SEARCH_TERMS:
+        print(f"Searching for term: {term}")
+        try:
+            results = client.app.bsky.feed.search_posts({"q": term, "limit": 100})
             for post in results.posts:
-                if post.uri not in seen_uris:
-                    seen_uris.add(post.uri)
-                    all_posts.append(
-                        {
-                            "createdAt": getattr(post.record, "createdAt", ""),
-                            "author": post.author.handle,
-                            "uri": post.uri,
-                            "text": getattr(post.record, "text", ""),
-                            "query": query,
-                        }
-                    )
+                all_posts.append({
+                    "createdAt": post.record.created_at,
+                    "author": post.author.handle,
+                    "uri": post.uri,
+                    "text": post.record.text,
+                    "search_term": term,
+                })
+        except Exception as e:
+            print(f"Error searching '{term}': {e}")
 
-            cursor = results.cursor
-            print(f"  Collected {len(all_posts)} total so far...")
+    # Save to CSV
+    with open(OUTPUT_FILE, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["createdAt", "author", "uri", "text", "search_term"])
+        writer.writeheader()
+        writer.writerows(all_posts)
 
-            if not cursor:
-                break
-
-            time.sleep(1)  # polite pause
-
-    save_to_csv(all_posts, OUTPUT_FILE)
     print(f"Saved {len(all_posts)} posts to {OUTPUT_FILE}")
 
 
