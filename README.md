@@ -23,22 +23,22 @@ task_ids:
 
 # Charlie Kirk Extremist Bluesky Dataset
 
-**Maintainer:** [@truconservatv](https://github.com/truconservatv)  
-
-This repository contains datasets built from **Bluesky’s public API**, focusing on extremist discourse surrounding Charlie Kirk — including posts celebrating his reported death and material tied to far-right and far-left extremist narratives.  
+**Maintainer:** [@campbellmsean](https://huggingface.co/campbellmsean)  
+**Created:** September 2025  
 
 ---
 
 ## Disclaimer
 
-This dataset is provided **for journalistic and research purposes only**.  
-It contains **publicly available information** gathered from a public-facing API.  
+This dataset contains **public posts** collected from Bluesky using the **public API**.  
 
-- No private information was collected.  
-- No accounts were accessed without authorization.  
-- The purpose is to allow **researchers, journalists, and watchdogs** to study extremist narratives, disinformation, and online radicalization patterns.  
+⚠️ **Important Notes**:
+- Posts were public and voluntarily made by their authors.  
+- This dataset is provided **solely for research, academic, and journalistic purposes**.  
+- It contains **harmful, offensive, extremist, and violent language**.  
+- No private accounts or non-public data were accessed.  
 
-The maintainer **does not endorse or promote any of the content** contained herein.
+The maintainer **does not endorse or promote** any of the content.
 
 ---
 
@@ -48,72 +48,30 @@ The maintainer **does not endorse or promote any of the content** contained here
 - `charliekirk_celebration_broad.csv` — broader subset including “deserved it” and related terms.  
 - `charliekirk_celebration.csv` — filtered extremist celebration subset.  
 - `charliekirk_extremist_review.csv` — curated review pack of flagged material.  
-- `charliekirk_review_pack.csv` — mixed low- and high-severity review pack.  
-- `charliekirk_flagged.csv` — posts scored by severity filters.  
-- Analysis scripts (e.g. `extended_analysis.py`, `celebration_filter.py`) for replication.  
+- `charliekirk_review_pack.csv` — mixed severity review pack.  
+- `charliekirk_flagged.csv` — severity-scored posts.  
+- Scripts: `extended_analysis.py`, `celebration_filter.py`, etc.  
 
 ---
 
 ## Methodology
 
-### Source
-All posts were collected via the official [atproto client](https://github.com/bluesky-social/atproto), accessing Bluesky’s **public API** only.  
-No private messages, hidden accounts, or non-public data were accessed.
-
-### Search Terms
-The following search queries were used:
-
-- "Charlie Kirk"  
-- "deserved it"  
-- "he deserved it"  
-- "she deserved it"  
-- "they deserved it"  
-- "far-right"  
-- "right-wing"  
-- "right-wing extremist"  
-- "Nazi"  
-- "Hitler"  
-- "white supremacist"  
-- "trans"
-
-These terms were chosen to surface extremist rhetoric celebrating Charlie Kirk’s death or embedding it in far-right/ideological discourse.
-
-### Filtering & Classification
-- **Keyword matches** (exact/regex)  
-- **Severity scoring** (1–5) depending on rhetoric intensity  
-- **Review subsets** prepared for manual validation  
-
-### Manual Curation
-After automated filtering, subsets were manually reviewed to confirm extremist content:  
-
-1. **Context check** – Was the phrase celebratory, or quoting/mockery?  
-2. **Tone classification** – Labeled Low/Medium/High severity:  
-   - Low: political reference  
-   - Medium: ambiguous or indirect endorsement  
-   - High: explicit celebration of Kirk’s death or ideological justification  
-3. **Exclusions** – Removed posts quoting without endorsement or unrelated to Kirk  
-
-This ensures the dataset reflects extremist rhetoric, not just raw keyword dumps.
-
-### Purpose
-This dataset exists for **journalistic and academic research**.  
-It is intended to help researchers and journalists study extremist celebration of political violence.  
-
-- Not for harassment or doxxing  
-- Posts are verbatim for verification  
-
-### Limitations
-- Some false positives (satire, criticism) may remain  
-- Handles are shown as in Bluesky’s API  
-- Posts are unaltered for transparency  
+- **Source:** Collected using [atproto client](https://github.com/bluesky-social/atproto) from Bluesky’s **public API**.  
+- **Queries:** `"Charlie Kirk"`, `"deserved it"`, `"he deserved"`, `"she deserved"`, `"they deserved"`, `"far-right"`, `"right-wing"`, `"right-wing extremist"`, `"Nazi"`, `"Hitler"`, `"white supremacist"`, `"trans"`.  
+- **Filtering:** Regex + severity scoring (1–5).  
+- **Manual curation:** Context checks excluded satire, quotes without endorsement, or unrelated posts.  
 
 ---
 
-## Usage
+## License
 
-Clone this repo:  
+**CC BY-NC-SA 4.0**  
+- Non-commercial use only  
+- Attribution required  
+- Share alike  
 
-```bash
-git clone https://github.com/truconservatv/charliekirk-extremist-bluesky.git
-cd charliekirk-extremist-bluesky
+---
 
+## Citation
+
+> Campbell, S. (2025). Charlie Kirk Extremist Bluesky Dataset. Hugging Face. https://huggingface.co/datasets/campbellmsean/charliekirk-extremist-bluesky
